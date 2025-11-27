@@ -1,4 +1,3 @@
-// main.js
 
 class Product {
   constructor(id, title, price, category) {
