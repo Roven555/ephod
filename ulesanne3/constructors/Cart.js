@@ -15,12 +15,22 @@ export class Cart {
     this.items.push({ product: product, quantity: quantity });
   }
 
-  removeProduct(productId) {
+  updateProductQuantity(productId, delta) {
     for (let i = 0; i < this.items.length; i++) {
       if (this.items[i].product.id === productId) {
-        this.items.splice(i, 1);
+        this.items[i].quantity += delta;
+
+        if (this.items[i].quantity <= 0) {
+          this.removeProduct(i);
+        }
         return;
       }
+    }
+  }
+
+  removeProduct(index) {
+    if (index >= 0 && index < this.items.length) {
+      this.items.splice(index, 1);
     }
   }
 
@@ -39,9 +49,29 @@ export class Cart {
     }
     return count;
   }
+
+  clear() {
+    this.items = [];
+  }
 }
 
-const cart = new Cart();
-cart.addProduct(laptop, 2);
-console.log("Cart totalItems:", cart.totalItems);
-console.log("Cart calculateTotal:", cart.calculateTotal());
+// Convenience API expected by views
+Cart.prototype.getAllProducts = function () {
+  return this.items;
+};
+
+Cart.prototype.calculateTotalWithoutVAT = function (vatPercent = 20) {
+  const total = this.calculateTotal();
+  return total / (1 + vatPercent / 100);
+};
+
+Cart.prototype.calculateTotalVAT = function (vatPercent = 20) {
+  return this.calculateTotal() - this.calculateTotalWithoutVAT(vatPercent);
+};
+
+Cart.prototype.removeProduct = function (productId) {
+  const idx = this.items.findIndex((it) => it.product.id === productId);
+  if (idx !== -1) this.items.splice(idx, 1);
+};
+
+export const cartConstructor = new Cart();

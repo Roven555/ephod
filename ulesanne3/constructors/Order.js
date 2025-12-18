@@ -17,5 +17,3 @@ export class Order {
 }
 
 // Kuvage tellimuste ajalugu
-
-customer.printOrderHistory();

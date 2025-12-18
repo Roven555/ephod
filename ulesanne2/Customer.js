@@ -1,4 +1,4 @@
-import { Order } from './order.js';
+import { Order } from "./Order.js";
 
 export class Customer {
   constructor(name) {
@@ -14,11 +14,16 @@ export class Customer {
   printOrderHistory() {
     for (let i = 0; i < this.orderHistory.length; i++) {
       const order = this.orderHistory[i];
-      console.log(order.orderDate.toLocaleString() + " - " + order.cart.calculateTotal() + "€");
+      console.log(
+        order.orderDate.toLocaleString() +
+          " - " +
+          order.cart.calculateTotal() +
+          "€"
+      );
     }
   }
 }
 
-const customer = new Customer('Alice');
+const customer = new Customer("Alice");
 
 customer.placeOrder(cart);

@@ -4,12 +4,27 @@ export class Customer {
   constructor(name) {
     this.name = name;
     this.orderHistory = [];
-    this.favorites
+    this.favorites = [];
   }
 
   placeOrder(cart) {
     const order = new Order(cart);
     this.orderHistory.push(order);
+  }
+
+  toggleFavorites(product) {
+    const idx = this.favorites.findIndex(
+      (it) => it.product && it.product.id === product.id
+    );
+    if (idx === -1) {
+      this.favorites.push({ product });
+    } else {
+      this.favorites.splice(idx, 1);
+    }
+  }
+
+  getAllFavorites() {
+    return this.favorites;
   }
 
   printOrderHistory() {
@@ -25,6 +40,4 @@ export class Customer {
   }
 }
 
-const customer = new Customer("Alice");
-
-customer.placeOrder(cart);
+export const customerConstructor = new Customer("Alice");

@@ -1,6 +1,6 @@
-import { Product } from "./product.js";
+import { Product } from "./Product.js";
 import { Cart } from "./Cart.js";
-import { Customer } from "./customer.js";
+import { Customer } from "./Customer.js";
 
 const laptop = new Product(1, "Sülearvuti", 999.99, "Elektroonika");
 const phone = new Product(2, "Telefon", 599.99, "Elektroonika");

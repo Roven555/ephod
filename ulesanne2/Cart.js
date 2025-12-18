@@ -1,4 +1,4 @@
-import { Product } from "./product.js";
+import { Product } from "./Product.js";
 
 export class Cart {
   constructor() {
@@ -40,8 +40,6 @@ export class Cart {
     return count;
   }
 }
-
-
 
 const cart = new Cart();
 cart.addProduct(laptop, 2);
