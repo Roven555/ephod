@@ -1,28 +1,26 @@
 export const displayAllProductView = (products) => {
-    const container = document.getElementById("main-container");
+    const container = document.querySelector("#all-products-view .products-container");
 
-    container.innerHTML = "<h2>Tooted</h2>";
+    if (!container) return;
 
-    const productsContainer = document.createElement("div");
-    productsContainer.classList.add("products-container");
+    container.innerHTML = "";
 
     products.forEach((product) => {
         const productCard = document.createElement("div");
-        productCard.classList.add("product");
+        productCard.className = "product-card";
 
         productCard.innerHTML = `
             <h3>${product.name}</h3>
             <p>Kategooria: ${product.category}</p>
-            <p>Hind: $${product.price}</p>
-            <button id="favorites">Lisa lemmikutesse</button>
+            <p><strong>Hind: ${product.price.toFixed(2)} €</strong></p>
+            <button class="add-to-cart-btn">Lisa ostukorvi</button>
         `;
 
-        const cartButton = document.createElement("button");
-        cartButton.textContent = "Lisa ostukorvi";
+        const button = productCard.querySelector(".add-to-cart-btn");
+        button.onclick = () => {
+            console.log(`Toode ${product.name} lisatud ostukorvi`);
+        };
 
-        productCard.appendChild(cartButton);
-        productsContainer.append(productCard);
+        container.appendChild(productCard);
     });
-
-    container.append(productsContainer);
 };

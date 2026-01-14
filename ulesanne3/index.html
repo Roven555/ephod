@@ -5,44 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>E-pood</title>
     <style>
-      /* Lisa CSS, et kuvada eri vaated, kategooriate filter, ostukorv ja lemmikud */
       body {
         font-family: Arial, sans-serif;
+        margin: 0;
       }
       .header {
         display: flex;
         justify-content: space-between;
-        padding: 10px;
-        background-color: #eee;
+        align-items: center;
+        padding: 10px 20px;
+        background-color: #f8f8f8;
+        border-bottom: 1px solid #ddd;
       }
-
       #main-container {
-        background-color: lightblue;
-        padding: 50px;
+        padding: 20px;
+        min-height: 400px;
       }
-
-      .product {
-        border: 2px solid black;
-        width: max-content;
+      .view-section {
+        margin-bottom: 40px;
         padding: 10px;
+        border-bottom: 1px dashed #ccc;
       }
-
       .products-container {
         display: grid;
-        grid-auto-flow: column;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
       }
-
-      #products-view {
-        display: grid;
+      .cart-item {
+        border: 1px solid #eee;
+        padding: 10px;
+        margin-bottom: 5px;
+      }
+      .summary {
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 5px;
       }
     </style>
   </head>
   <body>
     <header class="header">
-      <a href="/ylesanne3-dom"><h1>E-pood</h1></a>
-      <div id="categories">
-        <!-- Kategooriad: lisatakse JavaScripti abil -->
-      </div>
+      <a href="/" style="text-decoration: none; color: black"
+        ><h1>E-pood</h1></a
+      >
+      <div id="categories"></div>
       <div>
         <button id="favorites-button">Lemmikud</button>
         <button id="cart-button">
@@ -51,16 +57,25 @@
       </div>
     </header>
 
-    <main>
-      <section id="main-container"></section>
+    <main id="main-container">
+      <section id="all-products-view" class="view-section">
+        <h2>Kõik tooted</h2>
+        <div class="products-container"></div>
+      </section>
 
-      <!-- pärast route lisamist kustutame teised sektsioonid ja otsime üles ainult main-container'i -->
-      <section id="detailed-view"></section>
-      <section id="cart-view"></section>
-      <section id="favorite-view"></section>
+      <section id="product-detail-view" class="view-section">
+        <div id="product-detail-container"></div>
+      </section>
+
+      <section id="cart-view" class="view-section">
+        <div id="cart-container"></div>
+      </section>
+
+      <section id="favorites-view" class="view-section">
+        <div id="favorites-container"></div>
+      </section>
     </main>
 
-    <!-- JavaScripti mooduli laadimine -->
-    <script type="module" src="./main.js"></script>
+    <script type="module" src="main.js"></script>
   </body>
 </html>

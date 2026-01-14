@@ -5,23 +5,27 @@ import { displayAllProductView } from "./views/allProductsView.js";
 import { displayCartView } from "./views/cartView.js";
 import { displayFavoritesView } from "./views/favoritesView.js";
 import { displayProductDetailView } from "./views/productDetailView.js";
-
-const products = [
-  new Product(1, "Sülearvuti", 999.99, "Elektroonika"),
-  new Product(2, "Telefon", 599.99, "Elektroonika"),
-  new Product(3, "Tahvelarvuti", 299.99, "Elektroonika"),
-];
-
-cartConstructor.addProduct(products[0], 2);
-customerConstructor.toggleFavorites(products[0]);
+import { fetchProducts } from "./api.js";
 
 const initApp = async () => {
-  const favoritesButton = document.getElementById("favorites-button");
+  const rawData = await fetchProducts();
 
-  const cartButton = document.getElementById("cart-button");
+  const products = rawData.map(p => new Product(p.id, p.title, p.price, p.category));
 
-  displayAllProductView(products);
-  displayProductDetailView(products[1]);
+  console.log("Kõik tooted kätte saadud ja muudetud Product objektideks:");
+  console.table(products);
+
+  if (products.length > 0) {
+    cartConstructor.addProduct(products[0], 2);
+    customerConstructor.toggleFavorites(products[0]);
+    
+    displayAllProductView(products);
+    
+    if (products[1]) {
+      displayProductDetailView(products[1]);
+    }
+  }
+
   displayCartView();
   displayFavoritesView();
 };

@@ -2,7 +2,12 @@ import { cartConstructor } from "../constructors/Cart.js";
 import { customerConstructor } from "../constructors/Customer.js";
 
 export const displayCartView = () => {
-    const container = document.getElementById("cart-view");
+    // Kasutame täpset ID-d, mis on sinu index.html-is
+    const container = document.getElementById("cart-container");
+    
+    // Kui elementi ei leita, siis funktsioon seiskub ilma veata
+    if (!container) return;
+
     container.innerHTML = "<h2>Ostukorv</h2>";
 
     const cart = cartConstructor.getAllProducts();
@@ -14,8 +19,8 @@ export const displayCartView = () => {
         return;
     }
 
-    const cartContainer = document.createElement("div");
-    cartContainer.className = "cart-container";
+    const cartItemsWrapper = document.createElement("div");
+    cartItemsWrapper.className = "cart-items-wrapper";
 
     cart.forEach((item) => {
         const cartItemElement = document.createElement("div");
@@ -27,7 +32,6 @@ export const displayCartView = () => {
             <p>Kogus: ${item.quantity}</p>
         `;
 
-        
         const removeButton = document.createElement("button");
         removeButton.textContent = "Eemalda";
         removeButton.onclick = () => {
@@ -36,28 +40,22 @@ export const displayCartView = () => {
         };
 
         cartItemElement.appendChild(removeButton);
-        cartContainer.appendChild(cartItemElement);
+        cartItemsWrapper.appendChild(cartItemElement);
     });
 
-   
     const cartSummaryContainer = document.createElement("div");
     cartSummaryContainer.className = "cart-summary";
 
     cartSummaryContainer.innerHTML = `
         <h2>Kokkuvõte</h2>
         <div class="summary">
-            <p>Toodete hind kokku</p>
-            <p>${cartConstructor.calculateTotal().toFixed(2)}</p>
-            <p>Kokku ilma km</p>
-            <p>${cartConstructor.calculateTotalWithoutVAT().toFixed(2)}</p>
-            <p>Käibemaks</p>
-            <p>${cartConstructor.calculateTotalVAT().toFixed(2)}</p>
-            <p>Kokku</p>
-            <p>${cartConstructor.calculateTotal().toFixed(2)}</p>
+            <p>Toodete hind kokku: ${cartConstructor.calculateTotal().toFixed(2)}€</p>
+            <p>Kokku ilma km: ${cartConstructor.calculateTotalWithoutVAT().toFixed(2)}€</p>
+            <p>Käibemaks: ${cartConstructor.calculateTotalVAT().toFixed(2)}€</p>
+            <p><strong>Lõpphind: ${cartConstructor.calculateTotal().toFixed(2)}€</strong></p>
         </div>
     `;
 
-    // Action buttons
     const submitButton = document.createElement("button");
     submitButton.textContent = "Osta";
     submitButton.onclick = (e) => {
@@ -73,6 +71,5 @@ export const displayCartView = () => {
     };
 
     cartSummaryContainer.append(submitButton, cancelButton);
-
-    container.append(cartContainer, cartSummaryContainer);
+    container.append(cartItemsWrapper, cartSummaryContainer);
 };
