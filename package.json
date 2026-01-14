@@ -1,0 +1,27 @@
+{
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "name": "ephod",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "commonjs",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server",
+    "dev": "nodem --watch server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Roven555/ephod.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Roven555/ephod/issues"
+  },
+  "homepage": "https://github.com/Roven555/ephod#readme",
+  "description": ""
+}
