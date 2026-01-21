@@ -1,58 +1,97 @@
 import { cartConstructor } from "./constructors/Cart.js";
-import { customerConstructor } from "./customerConstructor.js"; 
+import { customerConstructor } from "./constructors/Customer.js"; 
 import { Product } from "./constructors/Product.js";
 import { displayAllProductView } from "./views/allProductsView.js";
-import { displayCartView } from "./views/cartView.js";
-import { displayFavoritesView } from "./views/favoritesView.js";
 import { displayProductDetailView } from "./views/productDetailView.js";
+import { displayCartView } from "./views/cartView.js"; 
+import { displayFavoritesView } from "./views/favoritesView.js"; 
 import { fetchProducts, fetchCategories, fetchProductById } from "./api.js";
 
-const initApp = async () => {
-  const rawData = await fetchProducts();
-  const categories = await fetchCategories();
-
-  const products = rawData.map(p => new Product(
-    p.id, 
-    p.title, 
-    p.price, 
-    p.category, 
-    p.description, 
-    p.image, 
-    p.rating
-  ));
-
-  const handleCategoryClick = (category) => {
-    if (category === "Kõik") {
-      displayAllProductView(products, categories, handleCategoryClick);
-    } else {
-      const filtered = products.filter(p => p.category === category);
-      displayAllProductView(filtered, categories, handleCategoryClick);
-    }
-  };
-
-  displayAllProductView(products, categories, handleCategoryClick);
-  displayCartView();
-  displayFavoritesView();
+const handleFavoriteToggle = (product) => {
+  customerConstructor.toggleFavorites(product);
+  
+  if (window.location.hash === "#/favorites") {
+    displayFavoritesView();
+  } else {
+    renderMainView(); 
+  }
 };
 
-window.addEventListener("hashchange", async () => {
+const renderMainView = async (filteredProducts = null) => {
+  try {
+    const rawData = filteredProducts || await fetchProducts();
+    const categories = await fetchCategories();
+    const currentFavorites = customerConstructor.getAllFavorites();
+
+    displayAllProductView(
+      rawData, 
+      categories, 
+      handleCategoryClick, 
+      currentFavorites, 
+      handleFavoriteToggle 
+    );
+  } catch (error) {
+    console.error("Viga toodete kuvamisel:", error);
+  }
+};
+
+const handleCategoryClick = async (category) => {
+  const allProducts = await fetchProducts();
+  if (category === "Kõik") {
+    renderMainView(allProducts);
+  } else {
+    const filtered = allProducts.filter(p => p.category === category);
+    renderMainView(filtered);
+  }
+};
+
+const handleNavigation = async () => {
   const hash = window.location.hash;
+  
   if (hash.startsWith("#/product/")) {
     const id = hash.split("/").pop();
-    const p = await fetchProductById(id);
-    if (p) {
-      const product = new Product(p.id, p.title, p.price, p.category, p.description, p.image, p.rating);
-      displayProductDetailView(product);
+    const product = await fetchProductById(id);
+    if (product) {
+      const isFav = customerConstructor.getAllFavorites().some(f => f.product && f.product.id === product.id);
+      displayProductDetailView(product, isFav);
     }
-  } else if (hash === "#/" || hash === "") {
-    initApp();
-  }
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  if (window.location.hash.startsWith("#/product/")) {
-    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  } else if (hash === "#/cart") {
+    displayCartView();
+  } else if (hash === "#/favorites") {
+    displayFavoritesView();
   } else {
-    initApp();
+    await renderMainView();
   }
-});
+};
+
+const initApp = async () => {
+  console.log("Rakendus käivitub...");
+  
+  document.getElementById("cart-button").onclick = () => {
+    window.location.hash = "#/cart";
+  };
+  
+  document.getElementById("favorites-button").onclick = () => {
+    window.location.hash = "#/favorites";
+  };
+
+  document.querySelector(".header h1").parentElement.onclick = (e) => {
+    e.preventDefault();
+    window.location.hash = "";
+    handleNavigation();
+  };
+
+  window.addEventListener("hashchange", handleNavigation);
+  await handleNavigation();
+  
+  updateCartCount();
+};
+
+export const updateCartCount = () => {
+  const cartCount = document.getElementById("cart-count");
+  if (cartCount) {
+    cartCount.innerText = cartConstructor.totalItems;
+  }
+};
+
+initApp();

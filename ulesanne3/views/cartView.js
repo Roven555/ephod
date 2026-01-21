@@ -1,75 +1,69 @@
+// js/views/cartView.js
 import { cartConstructor } from "../constructors/Cart.js";
-import { customerConstructor } from "../constructors/Customer.js";
 
 export const displayCartView = () => {
-    // Kasutame täpset ID-d, mis on sinu index.html-is
-    const container = document.getElementById("cart-container");
-    
-    // Kui elementi ei leita, siis funktsioon seiskub ilma veata
+    const container = document.getElementById("main-container"); // Kasutame peamist konteinerit
     if (!container) return;
 
     container.innerHTML = "<h2>Ostukorv</h2>";
+    const items = cartConstructor.items;
 
-    const cart = cartConstructor.getAllProducts();
-
-    if (!cart.length) {
-        const emptyMessage = document.createElement("p");
-        emptyMessage.innerText = "Ostukorv on tühi";
-        container.appendChild(emptyMessage);
+    if (items.length === 0) {
+        container.innerHTML += "<p>Ostukorv on tühi.</p>";
         return;
     }
 
-    const cartItemsWrapper = document.createElement("div");
-    cartItemsWrapper.className = "cart-items-wrapper";
-
-    cart.forEach((item) => {
-        const cartItemElement = document.createElement("div");
-        cartItemElement.classList.add("cart-item");
-
-        cartItemElement.innerHTML = `
-            <h3>${item.product.name}</h3>
-            <p>Hind: $${item.product.price}</p>
-            <p>Kogus: ${item.quantity}</p>
+    const table = document.createElement("div");
+    items.forEach(item => {
+        const row = document.createElement("div");
+        row.style = "display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 10px;";
+        row.innerHTML = `
+            <span>${item.product.title}</span>
+            <div>
+                <button class="minus" data-id="${item.product.id}">-</button>
+                <span>${item.quantity}</span>
+                <button class="plus" data-id="${item.product.id}">+</button>
+            </div>
+            <span>${(item.product.price * item.quantity).toFixed(2)} €</span>
+            <button class="remove" data-id="${item.product.id}">Eemalda</button>
         `;
 
-        const removeButton = document.createElement("button");
-        removeButton.textContent = "Eemalda";
-        removeButton.onclick = () => {
-            cartConstructor.removeProduct(item.product.id);
-            displayCartView();
+        row.querySelector(".minus").onclick = () => {
+            cartConstructor.updateProductQuantity(item.product.id, -1);
+            updateCartUI();
         };
-
-        cartItemElement.appendChild(removeButton);
-        cartItemsWrapper.appendChild(cartItemElement);
+        row.querySelector(".plus").onclick = () => {
+            cartConstructor.updateProductQuantity(item.product.id, 1);
+            updateCartUI();
+        };
+        row.querySelector(".remove").onclick = () => {
+            cartConstructor.removeProduct(item.product.id);
+            updateCartUI();
+        };
+        table.appendChild(row);
     });
 
-    const cartSummaryContainer = document.createElement("div");
-    cartSummaryContainer.className = "cart-summary";
-
-    cartSummaryContainer.innerHTML = `
-        <h2>Kokkuvõte</h2>
-        <div class="summary">
-            <p>Toodete hind kokku: ${cartConstructor.calculateTotal().toFixed(2)}€</p>
-            <p>Kokku ilma km: ${cartConstructor.calculateTotalWithoutVAT().toFixed(2)}€</p>
-            <p>Käibemaks: ${cartConstructor.calculateTotalVAT().toFixed(2)}€</p>
-            <p><strong>Lõpphind: ${cartConstructor.calculateTotal().toFixed(2)}€</strong></p>
+    const summary = document.createElement("div");
+    summary.innerHTML = `
+        <div style="margin-top: 20px; background: #f9f9f9; padding: 15px;">
+            <p>Summa ilma KM-ta: ${cartConstructor.calculateTotalWithoutVAT().toFixed(2)} €</p>
+            <p>Käibemaks (22%): ${cartConstructor.calculateTotalVAT().toFixed(2)} €</p>
+            <h3>Kokku: ${cartConstructor.calculateTotal().toFixed(2)} €</h3>
+            <button id="clear-cart">Tühista ostukorv</button>
+            <button id="buy-btn">Osta</button>
         </div>
     `;
 
-    const submitButton = document.createElement("button");
-    submitButton.textContent = "Osta";
-    submitButton.onclick = (e) => {
-        e.stopPropagation();
-        customerConstructor.placeOrder(cartConstructor);
-    };
-
-    const cancelButton = document.createElement("button");
-    cancelButton.textContent = "Tühista ostukorv";
-    cancelButton.onclick = () => {
+    summary.querySelector("#clear-cart").onclick = () => {
         cartConstructor.clear();
-        displayCartView();
+        updateCartUI();
     };
 
-    cartSummaryContainer.append(submitButton, cancelButton);
-    container.append(cartItemsWrapper, cartSummaryContainer);
+    container.appendChild(table);
+    container.appendChild(summary);
+};
+
+const updateCartUI = () => {
+    displayCartView();
+    document.getElementById("cart-count").innerText = cartConstructor.totalItems;
 };
