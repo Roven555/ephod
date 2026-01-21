@@ -1,11 +1,11 @@
 import { cartConstructor } from "./constructors/Cart.js";
 import { customerConstructor } from "./constructors/Customer.js"; 
-import { Product } from "./constructors/Product.js";
 import { displayAllProductView } from "./views/allProductsView.js";
 import { displayProductDetailView } from "./views/productDetailView.js";
-import { displayCartView } from "./views/cartView.js"; 
-import { displayFavoritesView } from "./views/favoritesView.js"; 
+import { displayCartView } from "./views/cartView.js";
+import { displayFavoritesView } from "./views/favoritesView.js";
 import { fetchProducts, fetchCategories, fetchProductById } from "./api.js";
+
 
 const handleFavoriteToggle = (product) => {
   customerConstructor.toggleFavorites(product);
@@ -21,6 +21,7 @@ const renderMainView = async (filteredProducts = null) => {
   try {
     const rawData = filteredProducts || await fetchProducts();
     const categories = await fetchCategories();
+
     const currentFavorites = customerConstructor.getAllFavorites();
 
     displayAllProductView(
@@ -67,23 +68,17 @@ const handleNavigation = async () => {
 const initApp = async () => {
   console.log("Rakendus käivitub...");
   
-  document.getElementById("cart-button").onclick = () => {
-    window.location.hash = "#/cart";
-  };
-  
-  document.getElementById("favorites-button").onclick = () => {
-    window.location.hash = "#/favorites";
-  };
+  document.getElementById("cart-button").onclick = () => window.location.hash = "#/cart";
+  document.getElementById("favorites-button").onclick = () => window.location.hash = "#/favorites";
 
-  document.querySelector(".header h1").parentElement.onclick = (e) => {
-    e.preventDefault();
-    window.location.hash = "";
-    handleNavigation();
-  };
+  const logo = document.querySelector(".header h1") || document.querySelector("h1");
+  if (logo) {
+      logo.onclick = () => { window.location.hash = ""; };
+      logo.style.cursor = "pointer";
+  }
 
   window.addEventListener("hashchange", handleNavigation);
   await handleNavigation();
-  
   updateCartCount();
 };
 
