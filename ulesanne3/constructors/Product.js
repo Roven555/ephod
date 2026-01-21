@@ -1,9 +1,12 @@
 export class Product {
-  constructor(id, name, price, category) {
+  constructor(id, name, price, category, description = "", image = "", rating = null) {
     this.id = id;
     this.name = name;
     this.price = price;
     this.category = category;
+    this.description = description;
+    this.image = image;
+    this.rating = rating;
   }
 
   describe() {
@@ -14,7 +17,3 @@ export class Product {
     return price - (price * (percent / 100));
   }
 }
-
-const laptop = new Product(1, 'Sülearvuti', 999.99, 'Elektroonika');
-
-const phone = new Product(2, 'Telefon', 599.99, 'Elektroonika');
