@@ -9,51 +9,56 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 8000;
 
+app.use(express.json()); 
 app.use(express.static(__dirname));
 
-const getProductsData = async () => {
-  const dataPath = path.join(__dirname, "data", "products.json");
-  const data = await fs.readFile(dataPath, "utf-8");
-  return JSON.parse(data);
-};
+const PRODUCTS_PATH = path.join(__dirname, "data", "products.json");
+const FAVS_PATH = path.join(__dirname, "data", "favorites.json");
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
+
+const getFavs = async () => {
+  try {
+    const data = await fs.readFile(FAVS_PATH, "utf-8");
+    return JSON.parse(data);
+  } catch {
+    return {}; 
+  }
+};
 
 app.get("/api/products", async (req, res) => {
   try {
-    const products = await getProductsData();
-    res.status(200).json(products);
-  } catch (err) {
-    res.status(404).json([]);
-  }
+    const data = await fs.readFile(PRODUCTS_PATH, "utf-8");
+    res.status(200).json(JSON.parse(data));
+  } catch (err) { res.status(404).json([]); }
 });
 
-app.get("/api/products/:id", async (req, res) => {
-  try {
-    const products = await getProductsData();
-    const product = products.find((p) => p.id === parseInt(req.params.id));
-    if (product) {
-      res.status(200).json(product);
-    } else {
-      res.status(404).send("Cannot GET /api/products/" + req.params.id);
-    }
-  } catch (err) {
-    res.status(500).json(null);
-  }
+
+app.get("/api/favorites/:userId", async (req, res) => {
+  const favs = await getFavs();
+  res.json(favs[req.params.userId] || []);
 });
 
-app.get("/api/categories", async (req, res) => {
-  try {
-    const products = await getProductsData();
-    const categories = [...new Set(products.map((p) => p.category))];
-    res.status(200).json(categories);
-  } catch (err) {
-    res.status(404).json([]);
+app.post("/api/favorites/:userId/:productId", async (req, res) => {
+  const { userId, productId } = req.params;
+  const favs = await getFavs();
+  
+  if (!favs[userId]) favs[userId] = [];
+  if (!favs[userId].includes(productId)) {
+    favs[userId].push(productId);
+    await fs.writeFile(FAVS_PATH, JSON.stringify(favs, null, 2));
   }
+  res.status(201).json(favs[userId]);
 });
 
-app.listen(PORT, () => {
-  console.log(`http://localhost:${PORT}`);
+app.delete("/api/favorites/:userId/:productId", async (req, res) => {
+  const { userId, productId } = req.params;
+  const favs = await getFavs();
+  
+  if (favs[userId]) {
+    favs[userId] = favs[userId].filter(id => id !== productId);
+    await fs.writeFile(FAVS_PATH, JSON.stringify(favs, null, 2));
+  }
+  res.status(200).json(favs[userId]);
 });
+
+app.listen(PORT, () => console.log(`http://localhost:${PORT}`));

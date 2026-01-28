@@ -1,6 +1,13 @@
 export class Cart {
   constructor() {
-    this.items = [];
+
+    const savedCart = localStorage.getItem("shoppingCart");
+    this.items = savedCart ? JSON.parse(savedCart) : [];
+  }
+
+
+  saveToStorage() {
+    localStorage.setItem("shoppingCart", JSON.stringify(this.items));
   }
 
   addProduct(product, quantity = 1) {
@@ -10,6 +17,7 @@ export class Cart {
     } else {
       this.items.push({ product: product, quantity: quantity });
     }
+    this.saveToStorage(); 
   }
 
   updateProductQuantity(productId, delta) {
@@ -20,10 +28,12 @@ export class Cart {
         this.removeProduct(productId);
       }
     }
+    this.saveToStorage(); 
   }
 
   removeProduct(productId) {
     this.items = this.items.filter(item => item.product.id !== productId);
+    this.saveToStorage(); 
   }
 
   calculateTotal() {
@@ -36,6 +46,7 @@ export class Cart {
 
   clear() {
     this.items = [];
+    this.saveToStorage(); 
   }
 
   calculateTotalWithoutVAT(vatPercent = 22) { 
