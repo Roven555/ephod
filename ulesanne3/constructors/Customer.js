@@ -1,24 +1,33 @@
-import { Order } from "./Order.js";
-import { addFavorite, deleteFavorite } from "../api.js"; 
+import { addFavorite, deleteFavorite } from "../api.js";
 
 export class Customer {
   constructor(name) {
     this.name = name;
+    this.userId = null;
     this.orderHistory = [];
     this.favorites = [];
   }
 
-  async toggleFavorites(product, userId) {
+  setUserId(id) {
+    this.userId = id;
+  }
+
+  async toggleFavorites(product) {
+    if (!this.userId) {
+      console.error("Kasutaja ID puudu!");
+      return;
+    }
+
     const idx = this.favorites.findIndex(
-      (it) => it.product && it.product.id === product.id
+      (it) => it.product && String(it.product.id) === String(product.id),
     );
 
     if (idx === -1) {
       this.favorites.push({ product });
-      await addFavorite(userId, product.id); 
+      await addFavorite(this.userId, product.id);
     } else {
       this.favorites.splice(idx, 1);
-      await deleteFavorite(userId, product.id); 
+      await deleteFavorite(this.userId, product.id);
     }
   }
 
@@ -26,12 +35,8 @@ export class Customer {
     return this.favorites;
   }
 
-  getFavorites() {
-    return this.getAllFavorites();
-  }
-  
   setFavorites(favoritesArray) {
-    this.favorites = favoritesArray.map(product => ({ product }));
+    this.favorites = favoritesArray.map((product) => ({ product }));
   }
 }
 

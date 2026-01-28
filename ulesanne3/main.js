@@ -11,10 +11,8 @@ import {
   getFavoritesByUserId,
 } from "./api.js";
 
-let currentUserId = null;
-
 const handleFavoriteToggle = async (product) => {
-  await customerConstructor.toggleFavorites(product, currentUserId);
+  await customerConstructor.toggleFavorites(product);
 
   if (window.location.hash === "#/favorites") {
     displayFavoritesView();
@@ -68,7 +66,7 @@ const handleNavigation = async () => {
     if (product) {
       const isFav = customerConstructor
         .getAllFavorites()
-        .some((f) => f.product && f.product.id === parseInt(product.id));
+        .some((f) => f.product && String(f.product.id) === String(product.id));
       displayProductDetailView(product, isFav);
     }
   } else if (hash === "#/cart") {
@@ -81,14 +79,16 @@ const handleNavigation = async () => {
 };
 
 const initApp = async () => {
-  currentUserId = sessionStorage.getItem("userId");
-  if (!currentUserId) {
-    currentUserId = "user_" + Math.random().toString(36).substr(2, 9);
-    sessionStorage.setItem("userId", currentUserId);
+  let userId = sessionStorage.getItem("userId");
+  if (!userId) {
+    userId = "user_" + Math.random().toString(36).substr(2, 9);
+    sessionStorage.setItem("userId", userId);
   }
 
+  customerConstructor.setUserId(userId);
+
   try {
-    const serverFavIds = await getFavoritesByUserId(currentUserId);
+    const serverFavIds = await getFavoritesByUserId(userId);
     const allProducts = await fetchProducts();
 
     const favProducts = allProducts.filter((p) =>
@@ -100,17 +100,15 @@ const initApp = async () => {
     console.error("Viga lemmikute taastamisel:", error);
   }
 
-  document.getElementById("cart-button").onclick = () =>
-    (window.location.hash = "#/cart");
-  document.getElementById("favorites-button").onclick = () =>
-    (window.location.hash = "#/favorites");
+  const cartBtn = document.getElementById("cart-button");
+  if (cartBtn) cartBtn.onclick = () => (window.location.hash = "#/cart");
 
-  const logo =
-    document.querySelector(".header h1") || document.querySelector("h1");
+  const favBtn = document.getElementById("favorites-button");
+  if (favBtn) favBtn.onclick = () => (window.location.hash = "#/favorites");
+
+  const logo = document.querySelector(".header h1") || document.querySelector("h1");
   if (logo) {
-    logo.onclick = () => {
-      window.location.hash = "";
-    };
+    logo.onclick = () => { window.location.hash = ""; };
     logo.style.cursor = "pointer";
   }
 

@@ -4,7 +4,6 @@ export const fetchProducts = async () => {
 };
 
 export const fetchProductById = async (id) => {
-  // Kuna serveris pole eraldi /api/products/:id, otsime kõigi seast
   const products = await fetchProducts();
   return products.find(p => p.id == id) || null;
 };
