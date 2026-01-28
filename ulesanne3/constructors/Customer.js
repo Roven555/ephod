@@ -1,4 +1,5 @@
 import { Order } from "./Order.js";
+import { addFavorite, deleteFavorite } from "../api.js"; 
 
 export class Customer {
   constructor(name) {
@@ -7,19 +8,17 @@ export class Customer {
     this.favorites = [];
   }
 
-  placeOrder(cart) {
-    const order = new Order(cart);
-    this.orderHistory.push(order);
-  }
-
-  toggleFavorites(product) {
+  async toggleFavorites(product, userId) {
     const idx = this.favorites.findIndex(
       (it) => it.product && it.product.id === product.id
     );
+
     if (idx === -1) {
       this.favorites.push({ product });
+      await addFavorite(userId, product.id); 
     } else {
       this.favorites.splice(idx, 1);
+      await deleteFavorite(userId, product.id); 
     }
   }
 
@@ -27,16 +26,12 @@ export class Customer {
     return this.favorites;
   }
 
-  printOrderHistory() {
-    for (let i = 0; i < this.orderHistory.length; i++) {
-      const order = this.orderHistory[i];
-      console.log(
-        order.orderDate.toLocaleString() +
-          " - " +
-          order.cart.calculateTotal() +
-          "€"
-      );
-    }
+  getFavorites() {
+    return this.getAllFavorites();
+  }
+  
+  setFavorites(favoritesArray) {
+    this.favorites = favoritesArray.map(product => ({ product }));
   }
 }
 

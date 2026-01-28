@@ -12,9 +12,8 @@ const PORT = 8000;
 app.use(express.json()); 
 app.use(express.static(__dirname));
 
-const PRODUCTS_PATH = path.join(__dirname, "data", "products.json");
-const FAVS_PATH = path.join(__dirname, "data", "favorites.json");
-
+const PRODUCTS_PATH = path.join(__dirname, "ulesanne3", "data", "products.json");
+const FAVS_PATH = path.join(__dirname, "ulesanne3", "data", "favorites.json");
 
 const getFavs = async () => {
   try {
@@ -32,6 +31,14 @@ app.get("/api/products", async (req, res) => {
   } catch (err) { res.status(404).json([]); }
 });
 
+app.get("/api/categories", async (req, res) => {
+  try {
+    const data = await fs.readFile(PRODUCTS_PATH, "utf-8");
+    const products = JSON.parse(data);
+    const categories = [...new Set(products.map(p => p.category))];
+    res.status(200).json(categories);
+  } catch (err) { res.status(404).json([]); }
+});
 
 app.get("/api/favorites/:userId", async (req, res) => {
   const favs = await getFavs();

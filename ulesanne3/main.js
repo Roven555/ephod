@@ -8,8 +8,8 @@ import { fetchProducts, fetchCategories, fetchProductById } from "./api.js";
 
 let currentUserId = null;
 
-const handleFavoriteToggle = (product) => {
-  customerConstructor.toggleFavorites(product);
+const handleFavoriteToggle = async (product) => {
+  await customerConstructor.toggleFavorites(product, currentUserId);
 
   if (window.location.hash === "#/favorites") {
     displayFavoritesView();
@@ -56,7 +56,7 @@ const handleNavigation = async () => {
     if (product) {
       const isFav = customerConstructor
         .getAllFavorites()
-        .some((f) => f.product && f.product.id === product.id);
+        .some((f) => f.product && f.product.id === parseInt(product.id));
       displayProductDetailView(product, isFav);
     }
   } else if (hash === "#/cart") {
@@ -69,15 +69,10 @@ const handleNavigation = async () => {
 };
 
 const initApp = async () => {
-  console.log("Rakendus käivitub...");
-
   currentUserId = sessionStorage.getItem("userId");
   if (!currentUserId) {
     currentUserId = "user_" + Math.random().toString(36).substr(2, 9);
     sessionStorage.setItem("userId", currentUserId);
-    console.log("Uus kasutaja ID loodud:", currentUserId);
-  } else {
-    console.log("Olemasolev kasutaja ID laetud:", currentUserId);
   }
 
   document.getElementById("cart-button").onclick = () =>
