@@ -4,7 +4,12 @@ import { displayAllProductView } from "./views/allProductsView.js";
 import { displayProductDetailView } from "./views/productDetailView.js";
 import { displayCartView } from "./views/cartView.js";
 import { displayFavoritesView } from "./views/favoritesView.js";
-import { fetchProducts, fetchCategories, fetchProductById } from "./api.js";
+import {
+  fetchProducts,
+  fetchCategories,
+  fetchProductById,
+  getFavoritesByUserId,
+} from "./api.js";
 
 let currentUserId = null;
 
@@ -23,6 +28,11 @@ const renderMainView = async (filteredProducts = null) => {
     const rawData = filteredProducts || (await fetchProducts());
     const categories = await fetchCategories();
 
+    if (!Array.isArray(rawData)) {
+      console.error("Andmed pole kättesaadavad:", rawData);
+      return;
+    }
+
     const currentFavorites = customerConstructor.getAllFavorites();
 
     displayAllProductView(
@@ -39,6 +49,8 @@ const renderMainView = async (filteredProducts = null) => {
 
 const handleCategoryClick = async (category) => {
   const allProducts = await fetchProducts();
+  if (!Array.isArray(allProducts)) return;
+
   if (category === "Kõik") {
     renderMainView(allProducts);
   } else {
@@ -73,6 +85,19 @@ const initApp = async () => {
   if (!currentUserId) {
     currentUserId = "user_" + Math.random().toString(36).substr(2, 9);
     sessionStorage.setItem("userId", currentUserId);
+  }
+
+  try {
+    const serverFavIds = await getFavoritesByUserId(currentUserId);
+    const allProducts = await fetchProducts();
+
+    const favProducts = allProducts.filter((p) =>
+      serverFavIds.map(String).includes(String(p.id)),
+    );
+
+    customerConstructor.setFavorites(favProducts);
+  } catch (error) {
+    console.error("Viga lemmikute taastamisel:", error);
   }
 
   document.getElementById("cart-button").onclick = () =>
